@@ -1,3 +1,4 @@
+const {join} = require("path");
 const express = require("express");
 const routes = require("./routes");
 
@@ -6,7 +7,7 @@ const app = express();
 // Setting views configs
 app.set("view engine", "pug");
 app.set("views", join(__dirname, "./views"));
-if (app.get('env' === 'development')) {
+if (app.get('env') === 'development') {
     app.locals.pretty = true; // Do not optimize rendered files
 }
 
