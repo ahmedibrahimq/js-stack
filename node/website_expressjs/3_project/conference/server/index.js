@@ -1,9 +1,11 @@
 const {join} = require("path");
 const express = require("express");
 const httpErrors = require("http-errors")
+const configs = require("configs");
 const routes = require("./routes");
 
 const app = express();
+const config = configs[app.get('env')];
 
 // Setting views configs
 app.set("view engine", "pug");
