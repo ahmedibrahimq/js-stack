@@ -17,6 +17,13 @@ if (app.get('env') === 'development') {
 
 // Middlewares
 
+// a middleware for setting global variables that is evaluated per request, and globally available to all templates
+// Put it somewhere before the routes are defined
+app.use((req, res, next) => {
+    res.locals.renderTime = new Date();
+    return next();
+});
+
 // a static middleware
 //This path is relative to the application root folder
 app.use(express.static("public"));
