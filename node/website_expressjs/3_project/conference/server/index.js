@@ -1,11 +1,12 @@
 const {join} = require("path");
 const express = require("express");
 const httpErrors = require("http-errors")
-const configs = require("configs");
+const configs = require("./configs");
 const routes = require("./routes");
 
 const app = express();
 const config = configs[app.get('env')];
+app.locals.title = config.sitename; // a global template variable
 
 // Setting views configs
 app.set("view engine", "pug");
@@ -16,7 +17,9 @@ if (app.get('env') === 'development') {
 
 // Middlewares
 
-app.use(express.static("public")); // a static middleware this path is relative to the application root folder
+// a static middleware
+//This path is relative to the application root folder
+app.use(express.static("public"));
 app.get("/favicon.ico", (req, res, next) => res.sendStatus(204)); // empty responce:(No Content) Nothing to see here
 
 // Routes
