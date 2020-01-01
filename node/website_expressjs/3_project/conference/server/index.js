@@ -2,10 +2,13 @@ const {join} = require("path");
 const express = require("express");
 const httpErrors = require("http-errors")
 const configs = require("./configs");
+const SpeakerService = require("./services/SpeakerService");
 const routes = require("./routes");
 
 const app = express();
 const config = configs[app.get('env')];
+const speakerService = new SpeakerService(config.data.speakers); // Provide speakers data
+
 app.locals.title = config.sitename; // a global template variable
 
 // Setting views configs
@@ -17,22 +20,32 @@ if (app.get('env') === 'development') {
 
 // Middlewares
 
-// a middleware for setting global variables that is evaluated per request, and globally available to all templates
-// Put it somewhere before the routes are defined
-app.use((req, res, next) => {
-    res.locals.renderTime = new Date();
-    return next();
-});
-
 // a static middleware
 //This path is relative to the application root folder
 app.use(express.static("public"));
 app.get("/favicon.ico", (req, res, next) => res.sendStatus(204)); // empty responce:(No Content) Nothing to see here
 
+// a middleware for setting global variables that is evaluated per request, and globally available to all templates
+// Put it somewhere before the routes are defined,
+// and also after the express static middleware is called
+// because we don't want to run this for each static file e.g., css, img, ...
+app.use(async (req, res, next) => {
+    res.locals.renderTime = new Date();
+
+    try {
+        res.locals.speakersForHeader = await speakerService.getNames();
+    } catch (err) {
+        return next(err);        
+    }
+
+    return next();
+});
+
+
 // Routes
 
 // The main route
-app.use("/", routes()); // a routing middleware that reacts to the '/' regardless of the request verb(get,post ...)
+app.use("/", routes({speakerService})); // a routing middleware that reacts to the '/' regardless of the request verb(get,post ...)
 
 //Handling 404 Unknown routes
 // This matches if no other route matches. This handler comes after all routes are processed, to be sure that no other route matched
