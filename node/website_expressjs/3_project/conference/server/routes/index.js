@@ -4,9 +4,16 @@ const feedbackRoute = require("./feedback");
 
 const router = express.Router();
 
-module.exports = () => {
-    router.get("/", (req, res, next) => res.render("index", {pgName: "Home"}));
-    router.use("/speakers", speakersRoute());
-    router.use("/feedback", feedbackRoute());
+module.exports = (args = {}) => {
+    const { speakerService } = args;
+
+    router.get("/", async (req, res, next) => {
+        const [speakersList, artwork] = await Promise.all([speakerService.getNamesTitles(), speakerService.getAllArtwork()]);
+        return res.render("index", { pgName: "Home", speakersList, artwork });
+    });
+
+    router.use("/speakers", speakersRoute({ speakerService }));
+    router.use("/feedback", feedbackRoute({ speakerService }));
+
     return router;
 };
