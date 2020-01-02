@@ -1,27 +1,12 @@
 article.speakerslist.jumbotron.hidden-xs
     .container
         .row
-            .col-sm-4.text-center
-                h3.speakerslist-title Art in Full Bloom
-                h5.speakerslist-name
-                    | with
-                    a(href='/speakers/Lorenzo_Garcia') Lorenzo Garcia
-                p.speakerslist-info
-                    a(href='/speakers/Lorenzo_Garcia')
-                        img.speakerslist-img.img-circle(src='./images/speakers/Lorenzo_Garcia_tn.jpg', alt='Photo of Lorenzo Garcia')
-            .col-sm-4.text-center
-                h3.speakerslist-title Deep Sea Wonders
-                h5.speakerslist-name
-                    | with
-                    a(href='./Hillary_Goldwynn.html') Hilary Goldywynn Post
-                p.speakerslist-info
-                    a(href='./Hillary_Goldwynn.html')
-                        img.speakerslist-img.img-circle(src='./images/speakers/Hillary_Goldwynn_tn.jpg', alt='Photo of Hilary Goldywynn Post')
-            .col-sm-4.text-center
-                h3.speakerslist-title The Art of Abstract
-                h5.speakerslist-name
-                    | with
-                    a(href='/speakers/Riley_Rewington') Riley Rudolph Rewington
-                p.speakerslist-info
-                    a(href='/speakers/Riley_Rewington')
-                        img.speakerslist-img.img-circle(src='./images/speakers/Riley_Rewington_tn.jpg', alt='Photo of Riley Rudolph Rewington')
+            each speaker in speakersList
+                .col-sm-4.text-center
+                    h3.speakerslist-title=speaker.title
+                    h5.speakerslist-name
+                        | with&nbsp
+                        a(href=`/speakers/${speaker.nameURL}`)=speaker.name
+                    p.speakerslist-info
+                        a(href=`/speakers/${speaker.nameURL}`)
+                            img.speakerslist-img.img-circle(src=`/images/speakers/${speaker.nameURL}_tn.jpg`, alt=`Photo of ${speaker.name}`)

@@ -7,25 +7,14 @@ block content
                     .container
                         .row
                             .col-sm-8
-                                h3.speakerslist-title Deep Sea Wonders
+                                h3.speakerslist-title=speaker.title
                                 h5.speakerslist-name
-                                    | with
-                                    a(href='./Hillary_Goldwynn.html') Hilary Goldywynn Post
+                                    | with&nbsp
+                                    a(href=`/${speaker.shortname}`)=speaker.name
                                 p.speakerslist-info
-                                    a(href='./Hillary_Goldwynn.html')
-                                    img.speakerslist-img.img-responsive.pull-left(src='/images/speakers/Hillary_Goldwynn.jpg', alt='Photo of Hilary Goldywynn Post')
-                                p
-                                    | Hillary is a sophomore art sculpture student at New York University, and has already won all the major
-                                    | international prizes for new painters, including the Divinity Circle, the International Painter's Medal,
-                                    | and the Academy of Paris Award. Hillary's CAC exhibit features paintings that contain only water images
-                                    | including waves, deep sea, and river.
-                                p
-                                    | An avid water sports participant, Hillary understands the water in many ways in which others do not, or
-                                    | may not ever have the opportunity. Her goal in creating the CAC exhibit was to share with others the
-                                    | beauty, power, and flow of natural bodies of water throughout the world. In addition to the display,
-                                    | Hilary also hosts a session on Tuesday called Deep Sea Wonders, which combines her love of deep sea diving
-                                    | and snorkeling, with instruction for capturing the beauty of underwater explorations on canvas.
-                                p
-                        // primary
+                                    a(href=`/${speaker.shortname}`)
+                                    img.speakerslist-img.img-responsive.pull-left(src=`/images/speakers/${speaker.shortname}.jpg`, alt=`Photo of ${speaker.name}`)
+                                //-  ! <- give the unscaped version of the html in description property (unsecure)
+                                !=speaker.description
             aside.col-sm-4
                 include ../../includes/artwork

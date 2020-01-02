@@ -6,41 +6,15 @@ block content
             article.speakerslist
                 .container
                     .row
-                        .col-sm-8
-                            h3.speakerslist-title Art in Full Bloom
-                            h5.speakerslist-name
-                                | with
-                                a(href='/speakers/Lorenzo_Garcia') Lorenzo Garcia
-                            p.speakerslist-info
-                                a(href='/speakers/Lorenzo_Garcia')
-                                    img.speakerslist-img.img-circle.pull-left(src='./images/speakers/Lorenzo_Garcia_tn.jpg', alt='Photo of Lorenzo Garcia')
-                                |                   Drawing and painting flowers may seem like a first-year art student's assignment, but Lorenzo Garcia brings depth, shadows,
-                                |                   light, form and color to new heights with his unique and revolutionary technique of painting on canvas
-                                |                   with ceramic glaze. This session is sure to be a hit with mixed media buffs.
-                        .col-sm-8
-                            h3.speakerslist-title Deep Sea Wonders
-                            h5.speakerslist-name
-                                | with
-                                a(href='./Hillary_Goldwynn.html') Hilary Goldywynn Post
-                            p.speakerslist-info
-                                a(href='./Hillary_Goldwynn.html')
-                                    img.speakerslist-img.img-circle.pull-left(src='./images/speakers/Hillary_Goldwynn_tn.jpg', alt='Photo of Hilary Goldywynn Post')
-                                |                   Hillary is a sophomore art sculpture student at New York University, and has won the major international prizes for painters,
-                                |                   including the Divinity Circle and the International Painter's Medal. Hillary's exhibit features
-                                |                   paintings that contain only water including waves, deep sea, and river.
-                        .col-sm-8
-                            h3.speakerslist-title The Art of Abstract
-                            h5.speakerslist-name
-                                | with
-                                a(href='/speakers/Riley_Rewington') Riley Rudolph Rewington
-                            p.speakerslist-info
-                                a(href='/speakers/Riley_Rewington')
-                                    img.speakerslist-img.img-circle.pull-left(src='./images/speakers/Riley_Rewington_tn.jpg', alt='Photo of Riley Rudolph Rewington')
-                                |                   The leader of the MMA artistic movement in his hometown of Portland, Riley Rudolph Rewington draws a crowd wherever he goes.
-                                |                   Mixing street performance, video, music, and traditional art, Riley has created some of the most unique
-                                |                   and deeply poignant abstract works of his generation.
-                    // row
-                    // container
-                    // primary
+                        each speaker in speakersListwithSummary
+                            .col-sm-8
+                                h3.speakerslist-title=speaker.title
+                                h5.speakerslist-name
+                                    | with&nbsp
+                                    a(href=`/speakers/${speaker.nameURL}`)=speaker.name
+                                p.speakerslist-info
+                                    a(href=`/speakers/${speaker.nameURL}`)
+                                        img.speakerslist-img.img-circle.pull-left(src=`/images/speakers/${speaker.nameURL}_tn.jpg`, alt='Photo of ${speaker.name}')
+                                    |#{speaker.summary}
         aside.col-sm-4
             include ../includes/artwork
