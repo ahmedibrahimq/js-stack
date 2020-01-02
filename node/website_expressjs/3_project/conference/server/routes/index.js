@@ -5,7 +5,7 @@ const feedbackRoute = require("./feedback");
 const router = express.Router();
 
 module.exports = (args = {}) => {
-    const { speakerService } = args;
+    const { speakerService, feedbackService} = args;
 
     router.get("/", async (req, res, next) => {
         const [speakersList, artwork] = await Promise.all([speakerService.getNamesTitles(), speakerService.getAllArtwork()]);
@@ -13,7 +13,7 @@ module.exports = (args = {}) => {
     });
 
     router.use("/speakers", speakersRoute({ speakerService }));
-    router.use("/feedback", feedbackRoute({ speakerService }));
+    router.use("/feedback", feedbackRoute({ feedbackService }));
 
     return router;
 };
