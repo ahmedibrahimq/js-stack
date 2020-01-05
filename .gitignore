@@ -5,3 +5,6 @@ provided/
 
 # static files
 *.jpg
+
+#babel
+.babelrc
