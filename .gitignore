@@ -6,5 +6,9 @@ provided/
 # static files
 *.jpg
 
-#babel
+# babel
 .babelrc
+
+# environment variables
+.env
+.env-sample
