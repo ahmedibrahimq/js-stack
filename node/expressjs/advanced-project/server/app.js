@@ -4,6 +4,8 @@ const createError = require('http-errors');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const session = require('express-session');
+const mongoStore = require('connect-mongo')(session);
+const mongoose = require('mongoose');
 const routes = require('./routes');
 const SpeakerService = require('./services/SpeakerService');
 const FeedbackService = require('./services/FeedbackService');
@@ -23,7 +25,17 @@ module.exports = (config) => {
 
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(cookieParser());
-  
+
+  app.use(session({
+    secret: "very secret sign 12345678", // sign the sessions to prevent tampering
+    resave: true, // session will stay active even if it wasn't changed
+    saveUninitialized: false, // to prevent getting empty objects in the database
+    // Storing the session in MongoDB using `connect-mongo` module
+    // Reusing the mongoose conection as mongoose remains is module global state 
+    //  Once Mongoose is connected, the connection is available whenever we require mongoose.
+    store: new mongoStore({ mongooseConnection: mongoose.connection }) 
+  }));
+
   app.use(async (req, res, next) => {
     try {
       const names = await speakers.getNames();
