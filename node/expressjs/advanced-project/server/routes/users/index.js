@@ -1,4 +1,5 @@
 const express = require('express');
+const passport = require('passport');
 const UserModel = require('../../models/UserModel');
 
 const router = express.Router();
@@ -22,6 +23,13 @@ module.exports = () => {
       return next(err)
     }
   });
+
+  router.get('/login', (req, res) => res.render('users/login', { error: req.query.error }));
+
+  router.post('/login', passport.authenticate('local', {
+    successRedirect: '/',
+    failureRedirect: '/users/login?error=true',
+  }));
 
   router.get('/account', (req, res) => res.render('users/account', { user: req.user }));
 

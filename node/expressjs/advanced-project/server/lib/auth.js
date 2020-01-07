@@ -6,7 +6,7 @@ passport.use(new LocalStrategy(
   { usernameField: 'email' },
   async (username, password, callback) => {
     try {
-      const user = UserModel.findOne({ email: username }).exec(); // exec to get a real promise back
+      const user = await UserModel.findOne({ email: username }).exec(); // exec to get a real promise back
       const noError = null;
       const userFound = true;
 
