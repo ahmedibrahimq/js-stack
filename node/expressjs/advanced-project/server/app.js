@@ -7,6 +7,7 @@ const session = require('express-session');
 const mongoStore = require('connect-mongo')(session);
 const mongoose = require('mongoose');
 const routes = require('./routes');
+const auth = require('./lib/auth');
 const SpeakerService = require('./services/SpeakerService');
 const FeedbackService = require('./services/FeedbackService');
 
@@ -35,6 +36,12 @@ module.exports = (config) => {
     //  Once Mongoose is connected, the connection is available whenever we require mongoose.
     store: new mongoStore({ mongooseConnection: mongoose.connection }) 
   }));
+
+  // Hooking passport
+  // always do after the session middleware
+  app.use(auth.initialize);
+  app.use(auth.session);
+  app.use(auth.setUser); // to response locals
 
   app.use(async (req, res, next) => {
     try {
