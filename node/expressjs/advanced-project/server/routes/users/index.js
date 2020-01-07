@@ -31,6 +31,15 @@ module.exports = () => {
     failureRedirect: '/users/login?error=true',
   }));
 
+  /**
+   * passport automatically adds a function logout to the request object. 
+   * Behind the scenes it will clear the login session.
+   */
+  router.get('/logout', (req, res) => {
+    req.logout();
+    res.redirect('/');
+  })
+
   router.get('/account', (req, res) => res.render('users/account', { user: req.user }));
 
   return router;
