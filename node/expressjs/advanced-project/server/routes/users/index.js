@@ -1,6 +1,7 @@
 const express = require('express');
 const passport = require('passport');
 const UserModel = require('../../models/UserModel');
+const middlewares = require('../middlewares');
 
 const router = express.Router();
 
@@ -14,25 +15,35 @@ const redirectLoggedIn = (req, res, next) => {
 
 module.exports = () => {
   router.get('/registration',
-  redirectLoggedIn,
-  (req, res) => res.render('users/registration', { success: req.query.success }));
+    redirectLoggedIn,
+    (req, res) => res.render('users/registration', { success: req.query.success }));
 
-  router.post('/registration', async (req, res, next) => {
-    try {
-      const user = new UserModel({
-        username: req.body.username,
-        email: req.body.email,
-        password: req.body.password,
-      });
-      const userSaved = await user.save();
-      if (userSaved) {
-        return res.redirect('/users/registration?success=true')
+  router.post('/registration',
+    /**
+     * body-parser does not understand multipart encoding
+     * using multer to hanlde that
+     * Multer gives the uploaded result in request.files
+     *  and the regular form fields in request.body
+     * `upload.single`, to accept the single file upload
+     *  setting the field name of the file on the form input to 'avatar'
+     */
+    middlewares.upload.single('avatar'),
+    async (req, res, next) => {
+      try {
+        const user = new UserModel({
+          username: req.body.username,
+          email: req.body.email,
+          password: req.body.password,
+        });
+        const userSaved = await user.save();
+        if (userSaved) {
+          return res.redirect('/users/registration?success=true')
+        }
+        return next(new Error('Failed to create a new user!'));
+      } catch (err) {
+        return next(err)
       }
-      return next(new Error('Failed to create a new user!'));
-    } catch (err) {
-      return next(err)
-    }
-  });
+    });
 
   router.get('/login',
     redirectLoggedIn,
