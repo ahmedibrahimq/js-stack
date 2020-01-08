@@ -4,8 +4,18 @@ const UserModel = require('../../models/UserModel');
 
 const router = express.Router();
 
+const redirectLoggedIn = (req, res, next) => {
+  // Redirect the logged in user to account page
+  if (req.user) {
+    return res.redirect('/users/account');
+  }
+  return next();
+};
+
 module.exports = () => {
-  router.get('/registration', (req, res) => res.render('users/registration', { success: req.query.success }));
+  router.get('/registration',
+  redirectLoggedIn,
+  (req, res) => res.render('users/registration', { success: req.query.success }));
 
   router.post('/registration', async (req, res, next) => {
     try {
@@ -24,7 +34,9 @@ module.exports = () => {
     }
   });
 
-  router.get('/login', (req, res) => res.render('users/login', { error: req.query.error }));
+  router.get('/login',
+    redirectLoggedIn,
+    (req, res) => res.render('users/login', { error: req.query.error }));
 
   router.post('/login', passport.authenticate('local', {
     successRedirect: '/',
