@@ -8,7 +8,9 @@ const multer = require('multer');
 
 const upload = multer({
     // Allowing unlimited file sizes could be used to create a denial-of-service attack.
-    limits: 2 * 1024 * 1024, // 2 MB
+    limits: {
+        fileSize: 2 * 1024 * 1024, // 2 MB
+    } 
 });
 
 module.exports.upload = upload;
