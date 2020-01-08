@@ -36,6 +36,9 @@ const UserSchema = mongoose.Schema({
         trim: true,
         minlength: 8,
     },
+    avatar: {
+        type: String
+    }
 }, {
     // a configuration option that makes mongoose create and add an updated time stamp for each document
     timestamps: true,
