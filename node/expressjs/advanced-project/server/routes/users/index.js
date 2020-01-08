@@ -40,7 +40,12 @@ module.exports = () => {
     res.redirect('/');
   })
 
-  router.get('/account', (req, res) => res.render('users/account', { user: req.user }));
+  router.get('/account', (req, res, next) => {
+    if (!req.user) {
+      return res.status(403).redirect('/');
+    }
+    return next();
+  }, (req, res) => res.render('users/account', { user: req.user }));
 
   return router;
 };
