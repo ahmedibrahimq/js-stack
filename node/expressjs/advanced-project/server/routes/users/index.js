@@ -13,7 +13,9 @@ const redirectLoggedIn = (req, res, next) => {
   return next();
 };
 
-module.exports = () => {
+module.exports = (args) => {
+  const { avatars } = args;
+
   router.get('/registration',
     redirectLoggedIn,
     (req, res) => res.render('users/registration', { success: req.query.success }));
@@ -28,6 +30,7 @@ module.exports = () => {
      *  setting the field name of the file on the form input to 'avatar'
      */
     middlewares.upload.single('avatar'),
+    middlewares.handleAvatars(avatars),
     async (req, res, next) => {
       try {
         const user = new UserModel({
@@ -35,13 +38,20 @@ module.exports = () => {
           email: req.body.email,
           password: req.body.password,
         });
+        if (req.file && req.file.storedFilename) {
+          user.avatar = req.file.storedFilename;
+        }
+
         const userSaved = await user.save();
         if (userSaved) {
           return res.redirect('/users/registration?success=true')
         }
         return next(new Error('Failed to create a new user!'));
       } catch (err) {
-        return next(err)
+        if (req.file && req.file.storedFilename) {
+          await avatars.delete(req.file.storedFilename);
+        }
+        return next(err);
       }
     });
 
