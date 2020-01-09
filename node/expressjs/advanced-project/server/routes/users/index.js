@@ -85,7 +85,19 @@ module.exports = (args) => {
     // Setting Content-Type response header to tell the browser which image type it has to expect
     res.type('png');
     return res.sendFile(avatars.filepath(req.params.filename));
-  })
+  });
+
+  // Sending thumbnail of user avatar
+  router.get('/avatartn/:filename', async (req, res, next) => {
+    try {
+      res.type('png');
+    // passing the binary buffer
+    const thumbn = await avatars.thumbnail(req.params.filename); 
+    return res.end(thumbn, 'binary');
+    } catch (err) {
+      return next(err)
+    }
+  });
 
   return router;
 };
