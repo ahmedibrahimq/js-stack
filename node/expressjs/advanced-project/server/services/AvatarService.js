@@ -31,6 +31,14 @@ class AvatarService {
         return fileName;
     }
     
+    // Creates a thumbnail of user avatar
+    // return binary data
+    async thumbnail(filename) {
+        return sharp(this.filepath(filename))
+        .resize(50,50)
+        .toBuffer();
+    }
+
     async delete(filename) {
         await unlinkPromise(this.filepath(filename))
     }
