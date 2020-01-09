@@ -80,5 +80,12 @@ module.exports = (args) => {
     return next();
   }, (req, res) => res.render('users/account', { user: req.user }));
 
+  // Sending avatar image file to the browser through /users/avatar/<img>.png
+  router.get('/avatar/:filename', (req, res) => {
+    // Setting Content-Type response header to tell the browser which image type it has to expect
+    res.type('png');
+    return res.sendFile(avatars.filepath(req.params.filename));
+  })
+
   return router;
 };
