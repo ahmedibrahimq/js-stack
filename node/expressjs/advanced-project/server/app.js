@@ -1,4 +1,5 @@
 const express = require('express');
+const compression = require('compression');
 const path = require('path');
 const createError = require('http-errors');
 const bodyParser = require('body-parser');
@@ -17,6 +18,17 @@ module.exports = (config) => {
   const speakers = new SpeakerService(config.data.speakers);
   const feedback = new FeedbackService(config.data.feedback);
   const avatars = new AvatarService(config.data.avatars);
+
+  /**
+   * TUNING EXPRESS PERFORMANCE: COMPRESSION
+   * Http lets the server and the browser negotiate if
+   *  the data sent by the server should be compressed or not.
+   *  To enable that on the server side We will use `compress` module (a middleware).
+   * After adding this middleware a browser that accepts compressed responses (and all modern browsers do)
+   *  may be served a synced version of the html code, which can reduces the data to be transferred. 
+   * Adding compression to the chain of middlewares (should be putted on top).
+   */
+  app.use(compression());
 
   app.set('view engine', 'pug');
   app.set('views', path.join(__dirname, './views'));
