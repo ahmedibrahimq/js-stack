@@ -8,6 +8,11 @@ const config = require('../server/config')[process.env.NODE_ENV || 'development'
 const app = require('../server/app')(config);
 const db = require('../server/lib/db');
 
+// Replacing the synchronous console.log with a dedicated asynchronous logger (bunyan)
+// NOTICE: Output from bunyan is by default json, but bunyan has a console formatter
+//          we can pipe the output of npm start script to bunyan.
+const log = config.log();
+
 // Helper functions
 
 /**
@@ -41,18 +46,18 @@ const server = http.createServer(app);
 
 db.connect(config.database.dsn)
   .then(() => {
-    console.log('Connected to MongoDB');
+    log.info('Connected to MongoDB');
     server.listen(port);
   })
   .catch(err => 
-    console.error(err));
+    log.fatal(err));
 
 server.on('listening', () => {
   const addr = server.address();
   const bind = typeof addr === 'string'
     ? `pipe ${addr}`
     : `port ${addr.port}`;
-  console.log(`Listening on ${bind}`);
+  log.info(`Listening on ${bind}`);
 });
 
 // Handle server errors
@@ -68,15 +73,15 @@ server.on('error', (error) => {
   // handle specific listen errors with friendly messages
   switch (error.code) {
     case 'EACCES':
-      console.error(`${bind} requires elevated privileges`);
+      log.fatal(`${bind} requires elevated privileges`);
       process.exit(1);
       break;
     case 'EADDRINUSE':
-      console.error(`${bind} is already in use`);
+      log.fatal(`${bind} is already in use`);
       process.exit(1);
       break;
     default:
-      console.log(error);
+      log.info(error);
     // throw error;
   }
 });
