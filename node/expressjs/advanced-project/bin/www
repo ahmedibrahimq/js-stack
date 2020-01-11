@@ -1,0 +1,125 @@
+#!/usr/bin/env node
+
+/**
+ * Module dependencies.
+ */
+const http = require('http');
+const cluster = require('cluster');
+const { cpus } = require('os');
+const config = require('../server/config')[process.env.NODE_ENV || 'development'];
+const app = require('../server/app')(config);
+const db = require('../server/lib/db');
+
+// Replacing the synchronous console.log with a dedicated asynchronous logger (bunyan)
+// NOTICE: Output from bunyan is by default json, but bunyan has a console formatter
+//          we can pipe the output of npm start script to bunyan.
+const log = config.log();
+
+const numCPUs = cpus().length;
+// Helper functions
+
+/**
+ * Normalize a port into a number, string, or false.
+ */
+function normalizePort(val) {
+  const port = parseInt(val, 10);
+
+  if (Number.isNaN(port)) {
+    // named pipe
+    return val;
+  }
+  if (port >= 0) {
+    // port number
+    return port;
+  }
+  return false;
+}
+
+
+/**
+ * Get port from environment and store in Express.
+ */
+const port = normalizePort(process.env.PORT || '3000');
+app.set('port', port);
+
+/**
+ * Create HTTP server and listen on the provided port
+ */
+const server = http.createServer(app);
+
+/**
+ * Node.js runs in a single process, and basically in one thread.
+ *  This means that it does not fully utilize all CPUs on a host. 
+ *  BUT Node.js provides a cluster module, that will spin up child processes.
+ *   Under the hood, Node.js then uses interprocess communication to distribute the load
+ *    between the childe processes, ##round robin##.
+ * Node cluster is not the only way to achieve this.
+ *  The process manager PM2 can be configured to scale up to all CPUs as well.
+ */
+
+/**LOGIC OF THE CLUSTRING
+ * If cluster is master, (the process that starts first)
+ * then create workers for each free CPU.
+ * Handling errors: If a worker has stopped, (for scalability)
+ *  fork a new worker because otherwise, we would maybe run out of workers,
+ * Next add the code to run in a child process:
+ *  -> the (db connect), and (listening part), That's the main application code.
+ */
+if (cluster.isMaster) {
+  log.info(`Master ${process.pid} is running`);
+  
+  for (let i = 0; i < numCPUs; i++) {
+    cluster.fork()
+  }
+
+  // Handling errors
+  cluster.on('exit', worker => {
+    log.fatal(`Worker ${worker.process.pid} has stopped`);
+    cluster.fork();
+  });
+
+} else {
+  db.connect(config.database.dsn)
+    .then(() => {
+      log.info('Connected to MongoDB');
+      // Server listening 
+      server.listen(port);
+    })
+    .catch(err =>
+      log.fatal(err)
+    );
+}
+
+server.on('listening', () => {
+  const addr = server.address();
+  const bind = typeof addr === 'string'
+    ? `pipe ${addr}`
+    : `port ${addr.port}`;
+  log.info(`Listening on ${bind}`);
+});
+
+// Handle server errors
+server.on('error', (error) => {
+  if (error.syscall !== 'listen') {
+    throw error;
+  }
+
+  const bind = typeof port === 'string'
+    ? `Pipe ${port}`
+    : `Port ${port}`;
+
+  // handle specific listen errors with friendly messages
+  switch (error.code) {
+    case 'EACCES':
+      log.fatal(`${bind} requires elevated privileges`);
+      process.exit(1);
+      break;
+    case 'EADDRINUSE':
+      log.fatal(`${bind} is already in use`);
+      process.exit(1);
+      break;
+    default:
+      log.info(error);
+    // throw error;
+  }
+});
