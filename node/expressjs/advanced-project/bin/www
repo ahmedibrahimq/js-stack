@@ -4,6 +4,8 @@
  * Module dependencies.
  */
 const http = require('http');
+const cluster = require('cluster');
+const { cpus } = require('os');
 const config = require('../server/config')[process.env.NODE_ENV || 'development'];
 const app = require('../server/app')(config);
 const db = require('../server/lib/db');
@@ -13,6 +15,7 @@ const db = require('../server/lib/db');
 //          we can pipe the output of npm start script to bunyan.
 const log = config.log();
 
+const numCPUs = cpus().length;
 // Helper functions
 
 /**
@@ -44,13 +47,48 @@ app.set('port', port);
  */
 const server = http.createServer(app);
 
-db.connect(config.database.dsn)
-  .then(() => {
-    log.info('Connected to MongoDB');
-    server.listen(port);
-  })
-  .catch(err => 
-    log.fatal(err));
+/**
+ * Node.js runs in a single process, and basically in one thread.
+ *  This means that it does not fully utilize all CPUs on a host. 
+ *  BUT Node.js provides a cluster module, that will spin up child processes.
+ *   Under the hood, Node.js then uses interprocess communication to distribute the load
+ *    between the childe processes, ##round robin##.
+ * Node cluster is not the only way to achieve this.
+ *  The process manager PM2 can be configured to scale up to all CPUs as well.
+ */
+
+/**LOGIC OF THE CLUSTRING
+ * If cluster is master, (the process that starts first)
+ * then create workers for each free CPU.
+ * Handling errors: If a worker has stopped, (for scalability)
+ *  fork a new worker because otherwise, we would maybe run out of workers,
+ * Next add the code to run in a child process:
+ *  -> the (db connect), and (listening part), That's the main application code.
+ */
+if (cluster.isMaster) {
+  log.info(`Master ${process.pid} is running`);
+  
+  for (let i = 0; i < numCPUs; i++) {
+    cluster.fork()
+  }
+
+  // Handling errors
+  cluster.on('exit', worker => {
+    log.fatal(`Worker ${worker.process.pid} has stopped`);
+    cluster.fork();
+  });
+
+} else {
+  db.connect(config.database.dsn)
+    .then(() => {
+      log.info('Connected to MongoDB');
+      // Server listening 
+      server.listen(port);
+    })
+    .catch(err =>
+      log.fatal(err)
+    );
+}
 
 server.on('listening', () => {
   const addr = server.address();
