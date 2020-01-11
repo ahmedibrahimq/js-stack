@@ -1,4 +1,5 @@
 const express = require('express');
+const helmet = require('helmet');
 const compression = require('compression');
 const path = require('path');
 const createError = require('http-errors');
@@ -18,6 +19,14 @@ module.exports = (config) => {
   const speakers = new SpeakerService(config.data.speakers);
   const feedback = new FeedbackService(config.data.feedback);
   const avatars = new AvatarService(config.data.avatars);
+
+  /**SECURING THE APP
+   * Helmet adds some level of security to Express
+   * It combines a set of middlewares that deal with known-attacks vectors on websites.
+   * Helmet sets a few headers that deal with different kinds of attacks.
+   * Adding it as a middleware after instantiating express
+   */
+  app.use(helmet());
 
   /**
    * TUNING EXPRESS PERFORMANCE: COMPRESSION
