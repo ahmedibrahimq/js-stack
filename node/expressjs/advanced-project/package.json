@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node bin/www",
+    "start": "node bin/www | bunyan",
     "test": "npx mocha --exit --recursive test/"
   },
   "author": "",
